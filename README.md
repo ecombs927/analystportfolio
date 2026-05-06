@@ -68,7 +68,7 @@ ggplot(trump, aes(x = model_date, y = approve)) +
 <img width="2375" height="1174" alt="Sample Code Chunk" src="https://github.com/user-attachments/assets/5b198fca-5524-4f80-9267-acf414734b6a" />
 
 # 1st Sample of Original Work
-This is a study of regional conflict trends using data from UCDP from an earlier assignment. I have attached both the Quarto PDF Document here, and the replication .qmd file can be found in my repository.
+This is a study of regional conflict trends using data from UCDP from an earlier assignment. I have attached the Quarto PDF Document here, and the replication .qmd file can be found in my repository.
 
 [1st Sample of Original Work.pdf](https://github.com/user-attachments/files/27453568/1st.Sample.of.Original.Work.pdf)
 
