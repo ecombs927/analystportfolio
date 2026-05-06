@@ -10,6 +10,9 @@ For the first sample of original work, I included an analysis of regional confli
 
 Finally, for the second sample of original work, I used my analysis of women's legal and economic rights improving over time using the World Bank's report on Women, Business, and the Law dataset found here: https://wbl.worldbank.org/en/data/download-data#tabs-1c6624179e-item-d6630763cb-tab. This sample includes several graphs, summary statistics, and regression analysis, presented with a Quarto Beamer presentation.
 
+## Replication Files
+The individual .qmd replication files for the samples of original work can be found in the repository. In addtion, there is an R file that contains all of the relevant replication code for this entire portoflio project, titled "Analyst Portfolio R Script", that can also be found in the repository.
+
 # Sample Code Chunk
 This contains my sample code chunk pulled from an assignment earlier in the semester. It generates a line graph that is meant to replicate the graph from this link as best as possible: https://www.natesilver.net/p/trump-approval-ratings-nate-silver-bulletin.
 
