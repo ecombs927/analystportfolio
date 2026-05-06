@@ -8,3 +8,53 @@ For the code chunk, I used a chunk that generates a graph meant to replicate the
 For the first sample of original work, I included an analysis of regional conflict trends taken from the UCDP dataset found here: https://ucdp.uu.se/. It includes a written portion, summary statistics, and a visual component. This is presented with a Quarto PDF document.
 
 Finally, for the second sample of original work, I used my analysis of women's legal and economic rights improving over time using the World Bank's report on Women, Business, and the Law dataset found here: https://wbl.worldbank.org/en/data/download-data#tabs-1c6624179e-item-d6630763cb-tab. This sample includes several graphs, summary statistics, and regression analysis, presented with a Quarto Beamer presentation.
+
+# Sample Code Chunk
+```{r}
+ggplot(trump, aes(x = model_date, y = approve)) +
+  geom_ribbon(aes(ymin = approve_lo, ymax = approve_hi), fill = "#3B9C9C", alpha = 0.3, linetype = "dotted") +
+  geom_line(aes(y = approve), color = "#3B9C9C", linewidth = 0.9) +
+  geom_ribbon(aes(ymin = disapprove_lo, ymax = disapprove_hi), fill = "#F87217", alpha = 0.3, linetype = "dotted") +
+  geom_line(aes(y = disapprove), color = "#F87217", linewidth = 0.9) +
+  geom_line(aes(y = approve_hi), color = "#3B9C9C", linetype = "dotted") +
+  geom_line(aes(y = approve_lo), color = "#3B9C9C", linetype = "dotted") +
+  geom_line(aes(y = disapprove_hi), color = "#F87217", linetype = "dotted") +
+  geom_line(aes(y = disapprove_lo), color = "#F87217", linetype = "dotted") +
+  scale_color_manual(values = c("approve" = "#3B9C9C", "disapprove" = "#F87217")) +
+  geom_hline(yintercept = 50, linetype = "solid", color = "black", linewidth = 0.5) +
+  scale_y_continuous(
+    limits = c(30, 70),
+    labels = label_number(accuracy = 0.1, suffix = "%"),
+    expand = expansion(mult = c(0, .1))
+  ) + 
+  scale_x_date(
+    breaks = "3 months",
+    labels = label_date(format = "%b"),
+    limits = c(ymd("2025-01-21"), ymd("2026-02-11")),
+    expand = expansion(mult = c(0, .1)) 
+  ) +
+  labs(
+    x = NULL,
+    y = NULL,
+    color = 'Approval',
+    title = "Do Americans approve or disapprove of Donald Trump?",
+    subtitle = "An updating polling average of Donald Trump's approval rating and disapproval rating in his second term, accounting for each poll's quality, recency, sample size, and partisan lean",
+    caption = 'SILVER\nBULLETIN'
+  ) +
+  theme(
+      panel.grid.major = element_line(color = "lightgrey"),
+      panel.grid.minor = element_blank(),
+      panel.background = element_rect(fill = "white"),
+      plot.margin = margin(t = 10, r = 30, b = 10, l = 10),
+      plot.title = element_text(face = "bold", size = 18),
+      plot.caption = element_text(face = "bold"),
+    ) +
+  geom_text(data = label_data, 
+            aes(x = model_date, y = disapprove),
+            label = "Disapprove\n55.5%", color = "#f87217", hjust = -0.1) +
+  geom_text(data = label_data, 
+            aes(x = model_date, y = approve),
+            label = "Approve\n41.1%", color = "#3b9c96", hjust = -0.1) +
+  coord_cartesian(clip = "off")
+```
+
