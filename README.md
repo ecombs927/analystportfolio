@@ -15,6 +15,7 @@ This contains my sample code chunk pulled from an assignment earlier in the seme
 
 Note: The graph was meant to replicate the plot taken from this website several months ago, in mid-February 2026.
 
+## The Chunk Itself
 ```{r}
 ggplot(trump, aes(x = model_date, y = approve)) +
   geom_ribbon(aes(ymin = approve_lo, ymax = approve_hi), fill = "#3B9C9C", alpha = 0.3, linetype = "dotted") +
@@ -63,7 +64,7 @@ ggplot(trump, aes(x = model_date, y = approve)) +
   coord_cartesian(clip = "off")
 ```
 
-## Output of Code Chunk
+## Output of the Code Chunk
 <img width="2375" height="1174" alt="Sample Code Chunk" src="https://github.com/user-attachments/assets/5b198fca-5524-4f80-9267-acf414734b6a" />
 
 # 1st Sample of Original Work
