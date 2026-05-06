@@ -1,6 +1,7 @@
 # analystportfolio
 American University, Course SIS-750
 
+# Introduction
 This repository represents the culmination of my work in the graduate "Data Analysis" course at American University. The assignment was to include a resume tailored to a data analyst position, an exemplary code chunk from an assignment earlier in the semester, and two samples of improved original work from earlier in the semester.
 
 For the code chunk, I used a chunk that generates a graph meant to replicate the graph found here: https://www.natesilver.net/p/trump-approval-ratings-nate-silver-bulletin. It demonstrates many different skills on R, specifically using the ggplot2 package.
@@ -10,6 +11,10 @@ For the first sample of original work, I included an analysis of regional confli
 Finally, for the second sample of original work, I used my analysis of women's legal and economic rights improving over time using the World Bank's report on Women, Business, and the Law dataset found here: https://wbl.worldbank.org/en/data/download-data#tabs-1c6624179e-item-d6630763cb-tab. This sample includes several graphs, summary statistics, and regression analysis, presented with a Quarto Beamer presentation.
 
 # Sample Code Chunk
+This contains my sample code chunk pulled from an assignment earlier in the semester. It generates a line graph that is meant to replicate the graph from this link as best as possible: https://www.natesilver.net/p/trump-approval-ratings-nate-silver-bulletin.
+
+Note: The graph was meant to replicate the plot taken from this website several months ago, in mid-February 2026.
+
 ```{r}
 ggplot(trump, aes(x = model_date, y = approve)) +
   geom_ribbon(aes(ymin = approve_lo, ymax = approve_hi), fill = "#3B9C9C", alpha = 0.3, linetype = "dotted") +
@@ -57,4 +62,22 @@ ggplot(trump, aes(x = model_date, y = approve)) +
             label = "Approve\n41.1%", color = "#3b9c96", hjust = -0.1) +
   coord_cartesian(clip = "off")
 ```
+
+## Output of Code Chunk
+<img width="2125" height="1174" alt="Sample Code Chunk Output" src="https://github.com/user-attachments/assets/de86e6d0-fff7-4f6e-8c7e-2397ff3523a8" />
+
+# 1st Sample of Original Work
+This is a study of regional conflict trends using data from UCDP from an earlier assignment. I have attached both the Quarto PDF Document here, and the replication .qmd file can be found in my repository.
+
+[1st Sample of Original Work.pdf](https://github.com/user-attachments/files/27453568/1st.Sample.of.Original.Work.pdf)
+
+# 2nd Sample of Original Work
+This is a study of women's legal and economic rights using data taken from the World Bank. I have attached the Quarto Beamer Presentation, and the replication .qmd file can be found in my repository.
+
+[2nd Sample of Original Work.pdf](https://github.com/user-attachments/files/27453623/2nd.Sample.of.Original.Work.pdf)
+
+# Analyst Resume
+Finally, this is my resume specifically tailored to a data analyst position.
+
+[Emily Combs Resume.docx](https://github.com/user-attachments/files/27453629/Emily.Combs.Resume.docx)
 
