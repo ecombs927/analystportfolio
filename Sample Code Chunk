@@ -2,6 +2,7 @@ EXEMPLARY CODE CHUNK
 This contains my sample code chunk pulled from an assignment earlier in the semester. It generates a line graph that is meant to replicate the graph from this link as best as possible: https://www.natesilver.net/p/trump-approval-ratings-nate-silver-bulletin.
 Note: The graph was meant to replicate the plot taken from this website several months ago, in mid-February 2026.
 
+```{r}
 ggplot(trump, aes(x = model_date, y = approve)) +
   geom_ribbon(aes(ymin = approve_lo, ymax = approve_hi), fill = "#3B9C9C", alpha = 0.3, linetype = "dotted") +
   geom_line(aes(y = approve), color = "#3B9C9C", linewidth = 0.9) +
@@ -47,3 +48,4 @@ ggplot(trump, aes(x = model_date, y = approve)) +
             aes(x = model_date, y = approve),
             label = "Approve\n41.1%", color = "#3b9c96", hjust = -0.1) +
   coord_cartesian(clip = "off")
+```
