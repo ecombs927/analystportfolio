@@ -1,0 +1,356 @@
+---
+title: "2nd Sample of Original Work"
+subtitle: "World Bank Women, Business, & Law Data Analysis"
+author: "Emily Combs"
+format: 
+  beamer:
+    theme: Frankfurt
+    colortheme: seahorse
+    aspectratio: 32
+knitr:
+  opts_chunk:
+    echo: false
+    prompt: false
+    tidy: false
+    comment: NA
+    message: false
+    warning: false
+    fig.align: 'center'
+    cache: true
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(ggrepel)
+library(broom)
+
+df <- read_excel("wbl.xlsx", sheet = 'WBL Panel 2024')
+
+long_df <- df |>
+  pivot_longer(
+    cols = c(Mobility, Workplace, Pay, Marriage, Parenthood,
+             Entrepreneurship, Assets, Pension),
+    names_to = "pillar",
+    values_to = "score"
+  )
+
+df2 <- long_df |>
+  select(country, region, income_group, year, wbl_index, pillar, score) |>
+  mutate(
+    year = as.numeric(as.character(year))
+  )
+```
+
+# Introduction
+
+## Overview
+
+### Research Question
+
+Which dimension of women's legal and economic rights has improved the most over time, and what explains any variation in this improvement?
+
+### Motivation
+
+I was inspired to do this topic by the World Bank talk I attended at American University featuring Ana Tribin. I wanted to take the research findings she presented from the Women, Business, & Law Report further by analyzing how these legal and economic rights for women have evolved over time.
+
+## The Data
+
+:::: {.columns}
+
+::: {.column width ="50%"}
+- I used the World Bank's Women, Business, & Law Historical Dataset for this project.
+- The dataset covers 190 countries from 1971-2024, providing data on legal frameworks, supportive frameworks, and enforcement opinions, as well as regional and income-group specifications for each country.
+
+:::
+
+::: {.column width="50%"}
+- The data also covers country-level scores in ten pillars of women's rights, including:
+  1) Safety
+  2) Mobility
+  3) Work
+  4) Pay
+  5) Marriage
+  6) Parenthood
+  7) Childcare
+  8) Entrepreneurship
+  9) Assets
+  10) Pension
+
+:::
+
+::::
+
+## Methodology
+
+- I used statistics and visuals on R, including boxplots, bar graphs, and histograms to analyze the data.
+- I also used multivariate regression to explain my results and find statistical significance.
+
+## Central Findings
+
+- The Workplace Pillar was the most-improved pillar from 1971-2024.
+- Its improvement was fairly widespread, with no particular outlier countries pulling the rest of the world along.
+- There was significant variation by Region and Income Group in this improvement.
+- The change in Region was only selectively statistically significant, and Income Group was completely insignificant.
+- A country's initial score in 1971 was a very strong indicator of how much it would improve in its Workplace pillar score, demonstrating a "catch-up effect".
+
+# Which Pillar Improved the Most Over Time?
+
+## Identifying the Most-Improved Pillar of Women's Legal Rights
+
+:::: {.columns}
+
+::: {.column width ="40%"}
+\small - Figure 1 demonstrates that the Workplace pillar was the most-improved pillar from 1971-2024, with a total change in its score of approximately 65. 
+
+\small - The Workplace pillar represents the legal rights of women in their careers, such as any legislation on prohibiting gender-based discrimination or protecting against sexual harassment in the workplace.
+
+:::
+
+::: {.column width="60%"}
+```{r}
+#| fig-width: 4
+#| fig-asp: 0.619
+#| fig-cap: "Pillar Improvement Over Time"
+
+visual1_data <- df2 |>
+  group_by(pillar, year) |>
+  summarise(
+    mean_score = mean(score, na.rm = TRUE),
+    .groups = "drop"
+    ) |>
+  group_by(pillar) |>
+  summarize(
+    change = max(mean_score) - min(mean_score)
+    )
+
+ggplot(visual1_data, aes(x = reorder(pillar, change), y = change, color = pillar, fill = pillar)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    x = "Pillar",
+    y = "Total Change in Score"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+:::
+
+::::
+
+# Variation in Workplace Improvement
+
+## Distribution of Change Across Countries 
+:::: {.columns}
+
+::: {.column width ="60%"}
+```{r}
+#| fig-width: 4
+#| fig-asp: 0.619
+#| fig-cap: "Distribution of Workplace Pillar Score Changes Across Countries"
+
+workplace_change <- df2 |>
+  filter(pillar == "Workplace") |>
+  group_by(country) |>
+  summarise(
+    start = mean(score[year == min(year)], na.rm = TRUE),
+    end = mean(score[year == max(year)], na.rm = TRUE),
+    change = end - start,
+    .groups = "drop"
+  )
+
+#Graph
+ggplot(workplace_change, aes(x = change)) +
+  geom_histogram(bins = 30, fill = "seagreen") +
+  geom_jitter(aes(y = 0), height = 0.1, alpha = 0.5) +
+  scale_x_continuous(
+    limits = c(0, 110),
+    breaks = seq(0, 110, 10)
+  ) +
+  labs(
+    x = "Change in Score",
+    y = "Number of Countries"
+  ) +
+  theme_minimal()
+```
+
+:::
+
+::: {.column width="40%"}
+\scriptsize - Figure 2 shows that there were many countries that had a change in their Workplace pillar score of at least 70, which is a significant increase. There are also a fair amount of countries clustered at the 100 mark, meaning that they had a large increase of around 100 from their initial score over the years.
+
+\scriptsize - This demonstrates that there were no particular "outlier" countries who pulled the rest of the world with them in their sharp increase in the Workplace pillar, but rather a large conglomerate of countries that had a significant increase.
+
+:::
+
+::::
+
+## Distribution of Change Across Income Groups
+
+:::: {.columns}
+
+::: {.column width ="50%"}
+\scriptsize - Overall, Figure 3 demonstrates that income group could be a factor in how consistently a country improved in their Workplace score, rather than how much it improved, since the medians are similar but the variations are different.
+
+\scriptsize - High income countries were clearly stable performers, with little variation in their increased scores.
+
+\scriptsize - However, low income countries had a very wide spread in their improvement, showing inconsistency in their performances. Lower middle income countries improved more consistently than low income countries, but there was still a fair amount of variation from the median, and upper middle income countries were also quite variable in their improvement.
+
+:::
+
+::: {.column width="60%"}
+```{r}
+#| fig-width: 4
+#| fig-asp: 0.8
+#| fig-cap: "Distribution of Workplace Pillar Change By Income-Group"
+
+workplace_income_box <- df2 |>
+  filter(pillar == "Workplace", income_group != "Not classified") |>
+  group_by(country, income_group) |>
+  summarise(
+    start = mean(score[year == min(year)], na.rm = TRUE),
+    end = mean(score[year == max(year)], na.rm = TRUE),
+    change = end - start,
+    .groups = "drop"
+  )
+
+ggplot(workplace_income_box, aes(x = income_group, y = change)) +
+  geom_boxplot() +
+  labs(
+    x = "Income Group",
+    y = "Change in Score"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+:::
+
+::::
+
+## Distribution of Change Across Regions
+
+:::: {.columns}
+
+::: {.column width ="50%"}
+\scriptsize - Figure 4 shows different levels of variation in each region as well. The medians are also relatively equal across regions, meaning that it is most likely not a factor in how much a country improved. However, region could be a factor in how consistently a country improved in their Workplace score.
+
+\scriptsize - For example, the East Asia & the Pacific and MENA regions have significantly wide spreads in their improvement in the Workplace score.
+
+\scriptsize - Meanwhile, South Asia, Europe & Central Asia, Sub-Saharan Africa, and Latin America & the Caribbean have moderate spreads, where it seems an overall consistent performance with a few outliers.
+
+\scriptsize - Finally, the OECD has fairly consistent improved scoring, which seems to align with the high income group from the previous analysis on income-group variation.
+
+:::
+
+::: {.column width="60%"}
+```{r}
+#| fig-width: 4
+#| fig-asp: 0.8
+#| fig-cap: "Distribution of Workplace Pillar Change By Income-Group"
+
+workplace_region_box <- df2 |>
+  filter(pillar == "Workplace") |>
+  group_by(country, region) |>
+  summarise(
+    start = mean(score[year == min(year)], na.rm = TRUE),
+    end = mean(score[year == max(year)], na.rm = TRUE),
+    change = end - start,
+    .groups = "drop"
+  )
+
+ggplot(workplace_region_box, aes(x = region, y = change)) +
+  geom_boxplot() +
+  labs(
+    x = "Region",
+    y = "Change in Score"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+:::
+
+::::
+
+# Regression Analysis
+
+```{r}
+#| results: 'hide'
+
+regression_data <- df2 |>
+  filter(pillar == "Workplace") |>
+  group_by(country, income_group, region) |>
+  summarise(
+    initial_score = mean(score[year == min(year)], na.rm = TRUE),
+    final_score = mean(score[year == max(year)], na.rm = TRUE),
+    change = final_score - initial_score,
+    .groups = "drop"
+  ) |>
+  mutate(
+    income_group = as.factor(income_group),
+    region = as.factor(region)
+  )
+
+reg_model <- lm(change ~ income_group + region + initial_score,
+            data = regression_data)
+
+summary(reg_model)
+tidy(reg_model)
+results <- tidy(reg_model)
+```
+
+## The Results
+
+```{r}
+#| tbl-cap: "Regression Results"
+
+reg_table <- results |>
+  filter(term != "income_groupNot classified") |>
+  mutate(
+    term = case_when(
+      term == "regionEurope & Central Asia" ~ "Region: Europe & Central Asia",
+      term == "regionOECD" ~ "Region: OECD",
+      term == "regionLatin America & Caribbean" ~ "Region: Latin America & Caribbean",
+      term == "regionMiddle East & North Africa" ~ "Region: Middle East & North Africa",
+      term == "regionSouth Asia" ~ "Region: South Asia",
+      term == "regionSub-Saharan Africa" ~ "Region: Sub-Saharan Africa",
+      term == "income_groupLow income" ~ "Income Group: Low Income",
+      term == "income_groupLower middle income" ~ "Income Group: Lower Middle Income",
+      term == "income_groupUpper middle income" ~ "Income Group: Upper Middle Income",
+      term == "initial_score" ~ "Initial Score",
+      TRUE ~ term
+    )
+  ) |>
+  rename(
+    "Variable" = term,
+    "Estimate" = estimate,
+    "Std. Error" = std.error,
+    "Statistic" = statistic,
+    "P-Value" = p.value
+  )
+
+kable(reg_table, digits = 3, format = "latex") |>
+  kable_styling(font_size = 8)
+```
+
+## Discussion of the Results
+
+\scriptsize - First, for every 1 point increase in an initial score, a country’s improvement is about 0.85 points smaller. This means that countries that started at a lower score improved more, whereas countries that started at a better score improved less. These results are statistically significant (p<0.001), showing that there is strong evidence of a catch-up effect; countries with weaker initial workplace protections experienced significantly larger improvements over time.
+
+\scriptsize - Second, while some regions have no statistically significant differences (Latin America & the Caribbean, South Asia, and MENA), other regions improved more than the baseline region (East Asia & the Pacific), even after controlling for starting point and income. The OECD region in particular saw a very strong effect of improvement, even when controlling for income group and initial score (with an increase, or estimate, of approximately 27 points and a p-value of 0.002). Therefore, region is sometimes a significant factor in determining a country's improvement in the Workplace pillar, but not always.
+
+\scriptsize - Finally, a country's income group seemingly does not explain differences in improvement at all. None of the income groups have a statistically significant effect relative to the baseline group (High income), and the estimate value is very small compared to some of the regional scores. Therefore, once initial scores and regions are controlled for, a country's income group does not appear to matter in determining its improvement in the Workplace pillar.
+
+# Conclusion
+
+## Summary of Findings
+
+- Between 1971 and 2024, the Workplace pillar emerged as the most-improved dimension of women’s legal and economic rights with widespread growth across countries.
+- There was a significant catch-up effect in this improvement, where countries with lower initial scores in 1971 saw substantially larger improvements over time.
+- While income group was not a statistically significant factor in a country's improvement, the country's region played a selectively significant role.
+- While these results show that some countries still need some improvement in women's rights in the workplace, there is clearly hope for further improvement for women in business, the economy, and the law.
+

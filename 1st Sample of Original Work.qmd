@@ -1,0 +1,228 @@
+---
+title: "1st Sample of Original Work"
+subtitle: "UCDP Regional Conflict Trends Data Analysis"
+author: "Emily Combs"
+format:
+  pdf:
+    colorlinks: true
+    fig-width: 8
+    fig-height: 4
+fontsize: 11pt
+knitr:
+  opts_chunk: 
+    echo: false
+    eval: true
+    message: false
+    warning: false
+---
+
+```{r}
+# Setup -----------------------------------------------------
+# Install packages
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(ggrepel)
+library(ggtext)
+library(scales)
+library(broom)
+library(readxl)
+```
+
+# The Original Study
+
+For my own exploration of data, I used a dataset taken from the Uppsala Conflict Data Program (UCDP), found at https://ucdp.uu.se/. My dataset measures the number of armed conflicts from 1946-2024 and includes descriptive factors for each conflict. These include: (1) the reason for the conflict (i.e., being driven by territorial or political motivations), (2) the year it took place, (3) the region it took place, (4) the type of conflict (i.e., an interstate war, a civil war, an internationalized conflict, or an extrasystemic/colonial conflict), and (5) the level of intensity of the conflict (i.e., the amount of battle-related deaths).
+
+## The Written Element
+
+#### Introduction
+For my research, I analyzed the trend of active conflicts over time. I specifically focused on the post-World War Two time period, ranging from 1946 to 2024. I also focused on regional trends to compare each region's number of conflicts over time. I chose this topic because I come from a peacebuilding background in research, and I wanted to see the evolution of conflict since the Second World War using data analysis. Overall, my findings demonstrate that the number of global conflicts increased dramatically over time, largely due to the increase found in Africa. They also show that during the Cold War and post-Cold War time periods, Asia held the largest share of global conflicts, only to be surpassed by Africa post-9/11.
+
+#### Data & Methodology
+This study utilized the UCDP Armed Conflict Dataset, which measures the number of armed conflicts in the world from 1946-2024. This is taken from the Uppsala Conflict Data Program, a highly reputable source often cited in conflict prevention and peacebuilding research projects. 
+
+For my methodology, I combined the use of summary statistics and visuals using R. By tidying the dataset to focus solely on regional trends over time, I was able to hone in on my research topic. For my summary statistics, I made three tables to demonstrate trends over time - (1) the average amount of conflicts per region using the mean, median, minimum, maximum, and standard deviation for each region; (2) the regional share of total active conflicts over time; and (3) comparisons of conflicts per region during different eras of history, with anything after 1946 but before 1991 being during the Cold War, anything between 1991-2001 being the post-Cold War period, and anything after 2001 being post-9/11. After conducting these descriptive statistics, I then made a scatterplot depicting the regional trends over time.
+
+#### Results
+The results demonstrate that the number of active conflicts from 1949 to 2024 increased for every region, notably excluding Europe. However, certain regions have historically had a higher number of conflicts consistently, such as Asia and Africa. When comparing eras, the post-9/11 period has the highest total number of active conflicts (n=44), followed closely by the post-Cold War period (n=42). This is fascinating, largely disproving the idea that the post-Cold War period was one of relative peace. 
+
+Asia dominated the global share of conflicts during the Cold War and post-Cold War periods, demonstrating that the theatre of proxy wars was largely concentrated in Asia. However, Africa then became the global leader in conflicts in 2010, sharply increasing to the highest number of conflicts by any region in any time period in 2020 (n=30). In comparison, the Middle East has remained slightly more consistent throughout modern history, only predictably seeing a notable increase following 9/11. Finally, Europe and the Americas have been largely consistent; despite having ebbs and flows, they have not seen large increases or decreases throughout history. 
+
+#### Conclusion
+In conclusion, the regional trends over time of active conflicts demonstrate a notable increase. The key takeaway of this study is that Asia has borne the highest burden of active conflicts when compared to other regions, despite Africa holding the highest number of active conflicts by a wide margin post-9/11. Asia was also the key player in Cold War proxy wars and post-Cold War conflict, showing that it was the main theatre of proxy wars in the Cold War and continued to feel those effects after the conflict. In addition, the modern landscape has seen the highest number of global conflicts, followed closely by the post-Cold War period, with the duration of the Cold War seeing the lowest number of conflicts.
+
+## 3b.) Statistics
+
+To find relevant statistics, I first loaded and tidied the dataset. To tidy it, I used mutate() to label each region (as opposed to the given numbers 1-5 previously assigned to each region). I then used group_by() and summarise() to create a dataframe that looked specifically at the number of conflicts in each year for each region. I did this to narrow my research: I focused on regional trends over time.
+
+```{r}
+# Open & Tidy Data
+UCDP <- readxl::read_excel("UCDP_conflict.xlsx", na = c("N/A", "-99"))
+
+region_data <- UCDP |>
+  mutate(region_label = case_when(
+    region == 1 ~ "Europe",
+    region == 2 ~ "The Middle East",
+    region == 3 ~ "Asia",
+    region == 4 ~ "Africa",
+    region == 5 ~ "The Americas"
+  )
+  ) |>
+  group_by(year, region_label) |>
+  summarise(conflict_count = n(), .groups = "drop") |>
+  filter(!is.na(region_label))
+```
+
+Then, I made three summary tables to convey the relevant statistics from the data. I combined the first two, including (1) a summary table depicting the average amount of conflicts per region over time, the median, minimum, and maximum amount of conflicts per region, and the standard deviation for each region; and (2) a table demonstrating the regional share of total active conflicts over the years. 
+
+```{r}
+#Summary Table
+summary_table <- region_data |>
+  group_by(region_label) |>
+  summarise(
+    mean_conflicts = round(mean(conflict_count), 0),
+    median_conflicts = median(conflict_count),
+    min_conflicts = min(conflict_count),
+    max_conflicts = max(conflict_count),
+    sd_conflicts = round(sd(conflict_count), 2),
+  ) |>
+  arrange(desc(mean_conflicts)) |>
+  rename(
+    'Average Number of Conflicts' = mean_conflicts,
+    'Median Number of Conflicts' = median_conflicts,
+    'Lowest Number of Conflicts' = min_conflicts,
+    'Highest Number of Conflicts' = max_conflicts,
+    'Standard Deviation' = sd_conflicts,
+    'Region' = region_label
+  )
+
+#Regional Share of Conflict Table
+share_table <- region_data |>
+  group_by(year) |>
+  mutate(global_total = sum(conflict_count)) |>
+  ungroup() |>
+  group_by(region_label) |>
+  summarise(
+    avg_share = round(mean(conflict_count / global_total) * 100),
+    max_share = round(max(conflict_count / global_total) * 100),
+    min_share = round(min(conflict_count / global_total) * 100)
+  ) |>
+  arrange(desc(avg_share)) |>
+  rename(
+    'Average Share of Conflicts' = avg_share,
+    'Highest Share of Conflicts' = max_share,
+    'Lowest Share of Conflicts' = min_share,
+    'Region' = region_label
+  )
+
+#Combining Tables
+master_table <- summary_table |>
+  left_join(share_table, by = "Region")
+
+kable(
+  master_table,
+  caption = "Summary Statistics of Regional Conflict Trends and Shares, 1949-2024"
+) |>
+  kable_styling(font_size = 8) |>
+  column_spec(1, width = "2.3cm") |>
+  column_spec(2, width = "1.3cm") |>
+  column_spec(3, width = "1.3cm") |>
+  column_spec(4, width = "1.3cm") |>
+  column_spec(5, width = "1.3cm") |>
+  column_spec(6, width = "1.3cm") |>
+  column_spec(7, width = "1.3cm") |>
+  column_spec(8, width = "1.3cm") |>
+  column_spec(9, width = "1.3cm")
+```
+
+This table shows that Africa has held the highest maximum number of active conflicts relative to the other regions; however, Asia has a higher average and median. This shows that while Africa has recently spiked in terms of its number of conflicts, Asia has been more consistent throughout modern history in its high number of active conflicts. This is similarly demonstrated with Africa's relatively high standard deviation, showing that its number of conflicts has varied the most over time.
+
+The table also shows that Asia has, overall, had the highest average share of global conflicts throughout history. For Asia's highest share that it held at any one point in modern history, it comprised 92% of global conflicts at its peak. This is an astonishingly high number, especially when compared to the other regions. In addition, even at its lowest point, Asia held 25% of the global share of conflicts, a minimum share significantly higher than every other region's minimum. These results demonstrate that Asia is the region that has borne the highest burden of conflict throughout modern history. 
+
+```{r}
+# Era Comparisons Table
+era_table <- region_data |>
+  mutate(period = case_when(
+    year <= 1991 ~ "Cold War",
+    year <= 2001 ~ "Post-Cold War",
+    TRUE ~ "Post-9/11"
+  )) |>
+  mutate(period = factor(
+    period,
+    levels = c("Cold War", "Post-Cold War", "Post-9/11")
+  )) |>
+  group_by(region_label, period) |>
+  summarise(avg_conflicts = round(mean(conflict_count))) |>
+  arrange(region_label, period)
+
+era_table <- era_table |>
+  pivot_wider(
+    names_from = region_label,
+    values_from = avg_conflicts
+  ) |>
+  rename('Era' = period)
+
+era_long <- region_data |>
+  mutate(period = case_when(
+    year <= 1991 ~ "Cold War",
+    year <= 2001 ~ "Post-Cold War",
+    TRUE ~ "Post-9/11"
+  )) |>
+  group_by(region_label, period) |>
+  summarise(avg_conflicts = round(mean(conflict_count)), .groups = "drop") |>
+  pivot_wider(
+    names_from = period,
+    values_from = avg_conflicts
+  ) |>
+  rename(
+    Region = region_label,
+    `Cold War Average` = `Cold War`,
+    `Post-Cold War Average` = `Post-Cold War`,
+    `Post-9/11 Average` = `Post-9/11`
+  )
+
+kable(
+  era_long,
+  caption = "Summary Statistics of Historical Conflict Trends by Region, 1949-2024"
+)
+```
+
+Finally, the third, separate table depicts comparisons of different eras in history. I considered anything after 1946 but before 1991 as being during the Cold War, anything between 1991 and 2001 as post-Cold War, and anything following 2001 was considered post-9/11. 
+
+This table shows that Asia had the highest number in both the Cold War and post-Cold War periods, and then Africa took the lead post-9/11. This tells a similar story to the other two tables. Interestingly, however, while the Middle East did experience an increase in each new era, there is not as noticeable of a spike following 9/11 as one would expect. This demonstrates a potential weakness in this style of descriptive statistics, in that overall global trends and cultural attitudes are not captured by the mere number of conflicts, telling a potentially misleading story.
+
+## 3c.) Visuals
+
+For the visual aspect, I decided to use a scatterplot to demonstrate the trends in each region. The following scatterplot shows the number of conflicts in each region of the world from 1946-2024.
+
+```{r}
+# Make a Scatterplot
+myplot <- ggplot(region_data, aes(x = year, y = conflict_count, 
+color = region_label, shape = region_label)) +
+  geom_point(alpha = 0.5) + 
+  geom_smooth(se = FALSE) +
+  scale_color_manual(values = c(
+    "Europe" = "#3bb9ff",
+    "The Middle East" = "#ff8040",
+    "Asia" = "#b048b5",
+    "Africa" = "#c83f49",
+    "The Americas" = "#3cb371" 
+  )) +
+  scale_x_continuous(breaks = seq(1950, 2020, by = 10)) +
+  scale_y_continuous(expand = expansion(mult = c(0, .1))) +
+  labs(
+    title = "Trends of Active Conflicts by Region (1946–2024)",
+    x = "Year",
+    y = "Number of Active Conflicts",
+    color = "Region",
+    shape = "Region",
+    caption = "Source: UCDP Data"
+  ) +
+  theme(plot.title = element_text(face = "bold", size = 18))
+
+myplot
+```
+
+The scatterplot shows how Europe, while evolving over time, settled at a lower amount of conflicts in 2024 than in 1946, while every other region saw an increase in the amount of conflicts (even though the Americas only saw a very slight increase). The scatterplot also demonstrates a sharp increase in Africa beginning around 2005, becoming the clear leader in the number of active conflicts around 2010. In 2020, Africa then comprised the highest number of conflicts by any region in any time period (n=30). The Middle East similarly experienced an increase beginning around 2005, but it still remained below Asia in its number of conflicts. Finally, it is also notable that from 1946 through around 2010, Asia had the highest number of active conflicts. This is important because this time period spans the entire Cold War, showing the significant amount of proxy wars that took place in Asia relative to other regions of the world. Overall, this scatterplot tells a very similar story to that of the three tables of descriptive statistics.
+
+One potential drawback to this presentation of the data is that it is slightly misleading; while the numbers for each region are accurate, the graph does not demonstrate the large discrepancy between regions in the amount of countries they each have, which will of course influence the number of conflicts they have. However, I still believe this is an effective visual demonstration of the regional trends of conflicts since the Second World War.
